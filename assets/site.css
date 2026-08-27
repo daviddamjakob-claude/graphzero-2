@@ -3493,3 +3493,24 @@ plainest thing in the drawing rather than the most filled. */
    crosses stay muted: they are the case being rejected and should not compete.
    -------------------------------------------------------------------------- */
 .page[data-page="product"] .af-flow2 .af-bullet-icon-pro { color: var(--hl); }
+
+
+/* --------------------------------------------------------------------------
+   The module list drives the figure beside it, so pointing at a module has to
+   read as pointing at something. The title takes the same accent the drawing
+   lights with — one blue for one interaction, rather than the title answering
+   in the page's blue while the diagram answers in the figure's.
+
+   The whole item is the target, not just the title: the item is what carries
+   data-flow, so the copy and the drawing respond to the same gesture.
+   -------------------------------------------------------------------------- */
+.page[data-page="work-with-us"] .showcase__title {
+  transition: color var(--dur) var(--ease);
+}
+.page[data-page="work-with-us"] .showcase__item:hover .showcase__title,
+.page[data-page="work-with-us"] .showcase__item:focus-within .showcase__title {
+  color: var(--eu-blue);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}

@@ -9,10 +9,13 @@
      beside the module list rather than opening a page, and a diagram that
      assembles while you are reading the copy next to it competes with that
      copy instead of supporting it.
-   · Motion is ambient, and the list drives its intensity. The packets keep
-     flowing and the base keeps answering; pointing at a module makes its own
-     part larger and quicker, so the figure answers a question the reader is
-     already asking without having been still until they asked it.
+   · Nothing moves until it is asked to. At rest the figure is a still diagram:
+     the boxes and the lines that join them, and no traffic. The module list
+     drives it, and the three modules stack rather than each lighting its own
+     piece — Integration lights the sources and the flow into the base, the
+     Knowledge Base adds the base itself, Search & Agents adds the exchange out
+     to the assistants and lights the panel. Each module shows what it is plus
+     everything underneath it, which is the argument the list is making.
    · The closing inversion is off. The handoff says to turn it off when the page
      already has a dark block, and this one does — the security band.
    · The accent is read from --eu-blue rather than the handoff's #0000ff. The
@@ -138,19 +141,24 @@
   var layer = svg('svg', { width: W, height: W, viewBox: '0 0 ' + W + ' ' + W,
                            'aria-hidden': 'true',
                            style: 'position:absolute;inset:0;overflow:visible' });
-  PATHS.forEach(function (c) {
-    layer.appendChild(svg('path', {
+  /* Held rather than dropped: the flow lines and the boxes take the accent when
+     a module is pointed at, so each needs to be reachable afterwards. */
+  var pathEls = PATHS.map(function (c) {
+    var p = svg('path', {
       d: 'M ' + c[0].x + ' ' + c[0].y + ' C ' + c[1].x + ' ' + c[1].y + ' ' +
          c[2].x + ' ' + c[2].y + ' ' + c[3].x + ' ' + c[3].y,
       fill: 'none', stroke: C.line, 'stroke-width': '1'
-    }));
+    });
+    layer.appendChild(p);
+    return p;
   });
-  layer.appendChild(svg('line', { x1: LINK.x1, y1: LINK.y, x2: LINK.x2, y2: LINK.y,
-                                  stroke: C.line, 'stroke-width': '1' }));
+  var linkEl = svg('line', { x1: LINK.x1, y1: LINK.y, x2: LINK.x2, y2: LINK.y,
+                             stroke: C.line, 'stroke-width': '1' });
+  layer.appendChild(linkEl);
 
   /* One packet per ingestion curve, and a larger one for the exchange between
-     the base and the assistants. These are the only things that ever move; the
-     first frame of the loop gives them their positions. */
+     the base and the assistants. These are the only things that ever move, and
+     they start invisible: at rest there is no traffic to show. */
   var packets = PATHS.map(function () {
     var d = svg('circle', { r: '2', fill: C.accent, opacity: '0' });
     layer.appendChild(d);
@@ -160,11 +168,12 @@
   layer.appendChild(exchange);
   stage.appendChild(layer);
 
-  SRC.forEach(function (name, i) {
+  var srcRings = SRC.map(function (name, i) {
     var r = ring(SB.x, srcY(i), SB.w, SB.h, 8);
     r.appendChild(el('span',
       'padding-left:12px;font-size:12.5px;letter-spacing:-0.01em;color:' + C.ink, name));
     stage.appendChild(r);
+    return r;
   });
 
   var kb = ring(KB.x, KB.y, KB.w, KB.h, 24, 'flex-direction:column;justify-content:center;gap:14px;');
@@ -236,30 +245,69 @@
   if ('ResizeObserver' in window) new ResizeObserver(fit).observe(host);
   else window.addEventListener('resize', fit);
 
+  /* ---------- what each module lights ----------
+
+     Cumulative, because the modules are: the Knowledge Base is what the
+     ingestion feeds, and Search & Agents is what the base answers through. So
+     pointing at one shows it and everything under it rather than its own slice
+     in isolation, and moving down the list adds to the picture instead of
+     replacing it.
+
+     Level 0 is the resting state and it is completely still — hairline boxes,
+     hairline joins, no packets. */
+  var LEVEL = { ingest: 1, graph: 2, agents: 3 };
+  var level = 0;
+
+  function ringOf(on) { return 'inset 0 0 0 1px ' + (on ? C.accent : C.line); }
+
+  /* Everything the level decides, in one place, so the resting state cannot
+     drift from what the loop happens to have left behind. */
+  function paint() {
+    var lit = level >= 1;
+    srcRings.forEach(function (r) { r.style.boxShadow = ringOf(lit); });
+    kb.style.boxShadow = ringOf(level >= 2);
+    panel.style.boxShadow = ringOf(level >= 3);
+    pathEls.forEach(function (p) { p.setAttribute('stroke', lit ? C.accent : C.line); });
+    linkEl.setAttribute('stroke', level >= 3 ? C.accent : C.line);
+    if (!lit) packets.forEach(function (d) { d.setAttribute('opacity', 0); });
+    if (level < 3) exchange.setAttribute('opacity', 0);
+  }
+
+  [].concat(srcRings, [kb, panel]).forEach(function (n) {
+    n.style.transition = 'box-shadow 180ms ease';
+  });
+  pathEls.concat([linkEl]).forEach(function (n) {
+    n.style.transition = 'stroke 180ms ease';
+  });
+
+  /* Pointer only: these are reading aids, not controls, and there is nothing in
+     the figure that is not already said in the copy beside it. */
+  document.querySelectorAll('[data-flow]').forEach(function (item) {
+    var n = LEVEL[item.getAttribute('data-flow')];
+    if (!n) return;
+    item.addEventListener('pointerenter', function () { level = n; paint(); start(); });
+    item.addEventListener('pointerleave', function () { level = 0; paint(); stop(); });
+  });
+
+  paint();
+
   /* ---------- motion ----------
-     The packets run all the time; pointing at a module intensifies its own —
-     bigger dots, moving faster. The boost eases in and out rather than
-     switching, so the figure never jumps under the pointer.
+     Only while a module is pointed at. The packets run the ingestion curves
+     from level 1, and the exchange between the base and the assistants joins
+     at level 3.
 
-     Phase is accumulated per frame rather than computed from elapsed time.
-     That is what lets the speed change mid-flight: a dot carries on from where
-     it is and simply covers more ground, where `t * speed` would have snapped
-     it to a new position the moment the rate changed. */
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  var PART = {
-    ingest: { k: 0, want: 0, phase: 0, slow: 0.30, fast: 0.85, small: 2,   big: 3.5 },
-    agents: { k: 0, want: 0, phase: 0, slow: 0.35, fast: 0.95, small: 3.5, big: 5.5 }
-  };
+     Phase is accumulated per frame rather than computed from elapsed time, so
+     the run picks up where it left off when the pointer moves from one module
+     to the next rather than snapping to a new position. */
+  var PHASE = { ingest: 0, agents: 0 };
+  var ING_SPEED = 0.42, AG_SPEED = 0.5;
+  var ING_R = 2.6, AG_R = 4;
   var STAGGER = 0.13;   /* so the nine ingestion packets are never in step */
-  var EASE = 5;         /* how briskly a boost arrives, in units per second */
 
   var raf = null, last = 0, visible = true;
 
-  function mix(a, b, k) { return a + (b - a) * k; }
-
   function frame(now) {
-    if (!visible) { raf = null; return; }
+    if (!visible || level === 0) { raf = null; return; }
     raf = requestAnimationFrame(frame);
 
     /* clamped: a throttled or backgrounded tab can hand back a gap of seconds,
@@ -267,35 +315,36 @@
     var dt = Math.min((now - last) / 1000, 0.05);
     last = now;
 
-    var ing = PART.ingest;
-    ing.k += (ing.want - ing.k) * Math.min(1, dt * EASE);
-    ing.phase = (ing.phase + dt * mix(ing.slow, ing.fast, ing.k)) % 1;
-    var ingR = mix(ing.small, ing.big, ing.k);
+    PHASE.ingest = (PHASE.ingest + dt * ING_SPEED) % 1;
     PATHS.forEach(function (path, i) {
-      var p = (ing.phase + i * STAGGER) % 1;
+      var p = (PHASE.ingest + i * STAGGER) % 1;
       var at = bez(p, path);
       var d = packets[i];
       d.setAttribute('cx', at.x);
       d.setAttribute('cy', at.y);
-      d.setAttribute('r', ingR);
+      d.setAttribute('r', ING_R);
       /* fades in and out at the ends, so nothing appears or vanishes on a
          hard edge */
       d.setAttribute('opacity', Math.sin(Math.PI * p));
     });
 
-    var ag = PART.agents;
-    ag.k += (ag.want - ag.k) * Math.min(1, dt * EASE);
-    ag.phase = (ag.phase + dt * mix(ag.slow, ag.fast, ag.k)) % 2;
-    /* a question out and an answer back: a triangle wave, so it turns around
-       rather than jumping back to the start */
-    var q = ag.phase > 1 ? 2 - ag.phase : ag.phase;
-    exchange.setAttribute('cx', LINK.x1 + q * (LINK.x2 - LINK.x1));
-    exchange.setAttribute('r', mix(ag.small, ag.big, ag.k));
-    exchange.setAttribute('opacity', 0.35 + 0.65 * Math.sin(Math.PI * q));
+    if (level >= 3) {
+      PHASE.agents = (PHASE.agents + dt * AG_SPEED) % 2;
+      /* a question out and an answer back: a triangle wave, so it turns around
+         rather than jumping back to the start */
+      var q = PHASE.agents > 1 ? 2 - PHASE.agents : PHASE.agents;
+      exchange.setAttribute('cx', LINK.x1 + q * (LINK.x2 - LINK.x1));
+      exchange.setAttribute('r', AG_R);
+      exchange.setAttribute('opacity', 0.35 + 0.65 * Math.sin(Math.PI * q));
+    }
   }
 
+  /* The highlight is the point; the traffic is the embellishment. Under
+     prefers-reduced-motion the figure still lights up, it simply does not move. */
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   function start() {
-    if (raf || !visible) return;
+    if (still || raf || !visible || level === 0) return;
     last = performance.now();
     raf = requestAnimationFrame(frame);
   }
@@ -303,17 +352,6 @@
     if (raf) { cancelAnimationFrame(raf); raf = null; }
   }
 
-  /* The modules drive the intensity. Pointer only: these are reading aids, not
-     controls, and there is nothing here that is not already said in the copy
-     beside them. */
-  document.querySelectorAll('[data-flow]').forEach(function (item) {
-    var part = PART[item.getAttribute('data-flow')];
-    if (!part) return;
-    item.addEventListener('pointerenter', function () { part.want = 1; });
-    item.addEventListener('pointerleave', function () { part.want = 0; });
-  });
-
-  start();
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) {
       visible = entries[0].isIntersecting;
