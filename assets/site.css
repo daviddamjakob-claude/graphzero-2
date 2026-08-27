@@ -1991,8 +1991,15 @@ section[id] { scroll-margin-top: calc(var(--header-h) + var(--space-8)); }
        box-shadow:inset 0 0 0 1px var(--af-panel-border);
        padding:28px var(--af-pad-x) 28px;
      }
+     /* fixed, not absolute. The radios have to precede .af-panel for the
+        `:checked ~` selector to reach it, which put them at the diagram's top
+        edge — 542px above the toggle that operates them. Clicking a label
+        focuses its radio and the browser scrolls the focused control into
+        view, so every switch threw the reader back to the top of the section.
+        A fixed element is always inside the viewport, so there is nothing to
+        scroll to. Sibling order is DOM order, so the selector is untouched. */
      .af-flow2 .af-radio{
-       position:absolute; top:0; left:0; width:0; height:0; margin:0; padding:0;
+       position:fixed; top:0; left:0; width:0; height:0; margin:0; padding:0;
        border:none; outline:none; opacity:0; pointer-events:none;
        -webkit-appearance:none; appearance:none;
      }
