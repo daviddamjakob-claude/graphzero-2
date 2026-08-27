@@ -253,6 +253,12 @@
      in isolation, and moving down the list adds to the picture instead of
      replacing it.
 
+     Both flows run from level 2. The base is the thing traffic passes through
+     in each direction — it is fed and it answers — so showing only what feeds
+     it would be half of what it does. What Search & Agents adds on top is the
+     panel: the flow is already drawn by then, and the module that is the panel
+     is what lights it.
+
      Level 0 is the resting state and it is completely still — hairline boxes,
      hairline joins, no packets. */
   var LEVEL = { ingest: 1, graph: 2, agents: 3 };
@@ -268,9 +274,9 @@
     kb.style.boxShadow = ringOf(level >= 2);
     panel.style.boxShadow = ringOf(level >= 3);
     pathEls.forEach(function (p) { p.setAttribute('stroke', lit ? C.accent : C.line); });
-    linkEl.setAttribute('stroke', level >= 3 ? C.accent : C.line);
+    linkEl.setAttribute('stroke', level >= 2 ? C.accent : C.line);
     if (!lit) packets.forEach(function (d) { d.setAttribute('opacity', 0); });
-    if (level < 3) exchange.setAttribute('opacity', 0);
+    if (level < 2) exchange.setAttribute('opacity', 0);
   }
 
   [].concat(srcRings, [kb, panel]).forEach(function (n) {
@@ -294,7 +300,8 @@
   /* ---------- motion ----------
      Only while a module is pointed at. The packets run the ingestion curves
      from level 1, and the exchange between the base and the assistants joins
-     at level 3.
+     at level 2 — the base both receives and answers, so pointing at it shows
+     both directions.
 
      Phase is accumulated per frame rather than computed from elapsed time, so
      the run picks up where it left off when the pointer moves from one module
@@ -328,7 +335,7 @@
       d.setAttribute('opacity', Math.sin(Math.PI * p));
     });
 
-    if (level >= 3) {
+    if (level >= 2) {
       PHASE.agents = (PHASE.agents + dt * AG_SPEED) % 2;
       /* a question out and an answer back: a triangle wave, so it turns around
          rather than jumping back to the start */
