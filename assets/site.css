@@ -129,7 +129,7 @@
 .page[data-page="knowledge-base"],
 .page[data-page="knowledge-base-3"],
 .page[data-page="security"],
-.page[data-page="main"],
+.page[data-page="product"],
 .page[data-page="work-with-us"] { --hl: #0000ff; }
 .hl,
 .brand__slash { color: var(--hl, inherit); }
@@ -3203,35 +3203,35 @@ plainest thing in the drawing rather than the most filled. */
    ========================================================================== */
 
 /* --- the fold, from Knowledge Base 3 -------------------------------------- */
-.page[data-page="main"] .hero--stack .hero__inner--stack {
+.page[data-page="product"] .hero--stack .hero__inner--stack {
   justify-items: center;
   text-align: center;
 }
-.page[data-page="main"] .hero--stack .hero__title {
+.page[data-page="product"] .hero--stack .hero__title {
   font-size: clamp(2.25rem, 4.7vw, 3.75rem);
   max-width: 22ch;
 }
-.page[data-page="main"] .hero--stack .hero__lead { max-width: 54ch; }
-.page[data-page="main"] .hero--stack .hero__title,
-.page[data-page="main"] .hero--stack .hero__lead { margin-inline: auto; }
+.page[data-page="product"] .hero--stack .hero__lead { max-width: 54ch; }
+.page[data-page="product"] .hero--stack .hero__title,
+.page[data-page="product"] .hero--stack .hero__lead { margin-inline: auto; }
 @media (max-width: 900px) {
-  .page[data-page="main"] .hero--stack .hero__title { max-width: none; }
+  .page[data-page="product"] .hero--stack .hero__title { max-width: none; }
 }
 @media (max-width: 760px) {
-  .page[data-page="main"] .hero--stack .hero__title {
+  .page[data-page="product"] .hero--stack .hero__title {
     font-size: clamp(1.75rem, 9.15vw, 4.5rem);
   }
 }
 
 /* --- the three sections below it, from Knowledge Base B ------------------- */
-.page[data-page="main"] .af-head {
+.page[data-page="product"] .af-head {
   font-size: var(--fs-h2);
   line-height: var(--lh-h2);
   letter-spacing: var(--tracking-h2);
   margin-bottom: var(--space-12);
 }
-.page[data-page="main"] #architecture { padding-top: var(--section-lg); }
-.page[data-page="main"] #capabilities .h2 {
+.page[data-page="product"] #architecture { padding-top: var(--section-lg); }
+.page[data-page="product"] #capabilities .h2 {
   font-size: var(--fs-h2);
   line-height: var(--lh-h2);
   letter-spacing: var(--tracking-h2);
@@ -3251,23 +3251,26 @@ plainest thing in the drawing rather than the most filled. */
 
    Scoped to this page: the same diagram runs unmodified elsewhere.
    -------------------------------------------------------------------------- */
-.page[data-page="main"] #af-tab-direct:checked ~ .af-panel .af-toggle .af-opt-direct {
+.page[data-page="product"] #af-tab-direct:checked ~ .af-panel .af-toggle .af-opt-direct {
   background: var(--wash-grey-base);
   color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--ink-muted);
+  /* Rings in its own fill, the way the blue half does. A darker outline around
+     a pale fill reads as a border drawn on top of the grey rather than as one
+     grey shape, and made the rejected case the louder of the two. */
+  box-shadow: inset 0 0 0 1px var(--wash-grey-base);
 }
-.page[data-page="main"] #af-tab-kb:checked ~ .af-panel .af-toggle .af-opt-kb {
+.page[data-page="product"] #af-tab-kb:checked ~ .af-panel .af-toggle .af-opt-kb {
   background: var(--hl);
   color: var(--ink-invert);
   box-shadow: inset 0 0 0 1px var(--hl);
 }
 /* Hover on the half that is already selected keeps its own ground rather than
    falling back to the shared CTA fill the base rule hands it. */
-.page[data-page="main"] #af-tab-direct:checked ~ .af-panel .af-toggle .af-opt-direct:hover {
+.page[data-page="product"] #af-tab-direct:checked ~ .af-panel .af-toggle .af-opt-direct:hover {
   background: var(--wash-grey-base);
   color: var(--ink);
 }
-.page[data-page="main"] #af-tab-kb:checked ~ .af-panel .af-toggle .af-opt-kb:hover {
+.page[data-page="product"] #af-tab-kb:checked ~ .af-panel .af-toggle .af-opt-kb:hover {
   background: var(--hl);
   color: var(--ink-invert);
 }
@@ -3282,7 +3285,7 @@ plainest thing in the drawing rather than the most filled. */
    so the shorter card's title started ~11px below the other's and no two lines
    in the pair shared a baseline. Packing to the start is the whole fix.
    -------------------------------------------------------------------------- */
-.page[data-page="main"] .af-flow2--split .af-foot .af-bullets-col {
+.page[data-page="product"] .af-flow2--split .af-foot .af-bullets-col {
   justify-content: flex-start;
 }
 
@@ -3471,3 +3474,15 @@ plainest thing in the drawing rather than the most filled. */
 @media (max-width: 899px) {
   .page[data-page="work-with-us"] .split { gap: var(--space-12); }
 }
+
+
+/* --------------------------------------------------------------------------
+   The two outcome cards' marks, coloured by the case they belong to.
+
+   The ticks were the body ink, the same black as the words beside them, which
+   left the affirmative card reading no differently from the negative one. They
+   take the accent instead — the same blue the "With graphzero" half of the
+   toggle fills with, so the mark and the control that selects it agree. The
+   crosses stay muted: they are the case being rejected and should not compete.
+   -------------------------------------------------------------------------- */
+.page[data-page="product"] .af-flow2 .af-bullet-icon-pro { color: var(--hl); }
