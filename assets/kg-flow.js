@@ -91,8 +91,7 @@
     ink: cs.getPropertyValue('--heading').trim() || '#000',
     body: cs.getPropertyValue('--meta').trim() || '#565656',
     line: cs.getPropertyValue('--line').trim() || 'rgba(0,0,0,.16)',
-    accent: cs.getPropertyValue('--hl').trim() ||
-            cs.getPropertyValue('--eu-blue').trim() || '#0000ff'
+    accent: cs.getPropertyValue('--eu-blue').trim() || '#003399'
   };
 
   /* Longhand, never the `font` shorthand. The shorthand demands a family, and

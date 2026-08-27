@@ -3309,7 +3309,6 @@ plainest thing in the drawing rather than the most filled. */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: transparent;
   border-radius: 4px;
   overflow: hidden;
   /* The plate runs the height of the module list beside it rather than sizing
@@ -3419,8 +3418,56 @@ plainest thing in the drawing rather than the most filled. */
 .page[data-page="work-with-us"] .showcase__num { grid-column: 1; grid-row: 1; }
 .page[data-page="work-with-us"] .showcase__title { grid-column: 2; grid-row: 1; }
 .page[data-page="work-with-us"] .showcase__body { grid-column: 2; grid-row: 2; }
+/* Only the numeral treatment differs from the reference: it wants tabular
+   figures and no capitals. The line-height stays at the stylesheet's own
+   --lh-body — the numeral sits on the title's baseline, so a shorter line box
+   drops it against the title rather than leaving it where the row puts it. */
 .page[data-page="work-with-us"] .showcase__num {
   font-variant-numeric: tabular-nums;
-  line-height: normal;
   text-transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   The rest of the reference's strip, and two rules this stylesheet inherited
+   that the reference does not have. All page-scoped: the shared blocks stay as
+   the other pages want them.
+   -------------------------------------------------------------------------- */
+
+/* The resting first panel is open, and open means its body is readable. The
+   shared resting block sets flex-grow, the inverted tokens and the plate but
+   never the body's own opacity, which is 0 until something is pointed at — so
+   the panel stood as a black slab with its copy invisible in a 42px hole.
+   Reference: ref8-site.css:1811. */
+@media (min-width: 901px) {
+  .page[data-page="work-with-us"] .strip--split:not(:hover):not(:focus-within)
+    .strip__panel:first-child .strip__body { opacity: 1; }
+}
+
+/* Below the breakpoint the reference changes one thing only — the row's fixed
+   height is released. Everything else stays: .strip is already a grid there, so
+   the panels stack whatever the flex direction says, the bodies stay collapsed
+   (titles only on a phone) and the plate layer stays in place at opacity 0.
+   The block this stylesheet carries went further on all three counts, which
+   opened all four bodies and made the section 357px taller than the source. */
+@media (max-width: 900px) {
+  .page[data-page="work-with-us"] .strip--split { flex-direction: row; }
+  .page[data-page="work-with-us"] .strip--split .strip__body { max-height: 0; }
+  .page[data-page="work-with-us"] .strip--split .strip__panel::before { display: block; }
+  .page[data-page="work-with-us"] .strip--split .strip__panel::after { display: block; }
+}
+
+/* The knowledge-graph figure's accent. The script reads --eu-blue and this
+   stylesheet does not declare it, so the drawing was falling through to the
+   page's own #0000ff. Declared here rather than patched into the script, which
+   stays exactly as the reference wrote it. This is the figure's ink, not a
+   second accent for the page: nothing else reads it. */
+.page[data-page="work-with-us"] { --eu-blue: #003399; }
+
+/* Below the split's breakpoint this stylesheet halves .split's gap, on the
+   reasoning that a stacked split's column gap becomes a heading-to-sub-heading
+   space. The reference has no such rule and the team section's lead sits a full
+   space-12 under its heading at every width. Scoped: the Main page's own splits
+   keep the tightened gap. */
+@media (max-width: 899px) {
+  .page[data-page="work-with-us"] .split { gap: var(--space-12); }
 }
